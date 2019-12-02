@@ -13,3 +13,7 @@ class Tile:
     def addAnimal(self, animal):
         
         self.animal = deepcopy(animal)
+
+    def clear(self):
+        self.animal = None
+        self.id = "empty"

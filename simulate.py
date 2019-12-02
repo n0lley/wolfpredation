@@ -14,13 +14,15 @@ ax = fig.add_subplot(111)
 
 cmap = colors.ListedColormap(["green","black","brown"])
 ax.imshow(mplot, interpolation='nearest', cmap=cmap)
-plt.savefig("./gen.png")
+plt.savefig("./data/gen.png")
 plt.close()
 
-for i in range(10):
-    map.update()
+for i in range(50):
     print(i)
+    map.update()
     mplot = map.plotMap()
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
     ax.imshow(mplot, interpolation='nearest', cmap=cmap)
-    plt.savefig("./gen%d.png"%i)
+    plt.savefig("./data/gen%d.png"%i)
     plt.close()

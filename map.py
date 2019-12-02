@@ -58,25 +58,25 @@ class Map:
             
             #clear former location
             self.map[xloc][yloc].clear()
+            x = wolf.coords[0]
+            y = wolf.coords[1]
+            while (x, y) in list(tmpwolves.keys()) or x<0 or x>=c.MAPSIZE[0] or y<0 or y>=c.MAPSIZE[1]:
+                d = np.random.choice([-1,0,1], size=2)
+                x += d[0]
+                y += d[1]
+            
+            wolf.coords[0] = x
+            wolf.coords[1] = y
             tmpwolves[(wolf.coords[0],wolf.coords[1])] = wolf
         
         self.wolves = list(tmpwolves.keys())
-            
         #TODO: move deer
          
         #place wolves
         for w in self.wolves:
-            x = w[0]
-            y = w[1]
-            while self.map[x][y].id != "empty" or x <= 0 or x > c.MAPSIZE[0] or y <= 0 or y > c.MAPSIZE[1]:
-                x = w[0]
-                y = w[1]
-                d = np.random.choice([-1,0,1], size=2)
-                x += d[0]
-                y += d[1]
-            self.map[x][y].id = "wolf"
-            self.map[x][y].addAnimal(tmpwolves[w])
-            
+            self.map[w[0]][w[1]].id = "wolf"
+            self.map[w[0]][w[1]].addAnimal(tmpwolves[w])
+        
         #TODO: place deer
 
     def plotMap(self):

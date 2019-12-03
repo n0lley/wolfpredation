@@ -8,7 +8,7 @@ class Wolf:
     
         self.coords = coords
         self.energy = 100
-        self.heading = [0,0]
+        self.heading = [np.random.random(),np.random.random()]
         
     def move(self, neighborhood):
     
@@ -22,7 +22,7 @@ class Wolf:
         for col in neighborhood:
             for tile in col:
                 
-                if tile.id == "wolf":
+                if tile.id == "wolf" and tile.animal.coords != self.coords:
                     self.heading[0] += tile.animal.heading[0]
                     self.heading[1] += tile.animal.heading[1]
                 
@@ -30,7 +30,7 @@ class Wolf:
                     dist = abs(selfx - tile.coords[0]) + abs(selfy - tile.coords[1])
                     if dist < (abs(selfx - closestDeer[0]) + abs(selfy - closestDeer[1])):
                         closestDeer = tile.coords
-                        deerHeading = [(selfx-tile.coords[0])/dist, (selfy-tile.coords[1])/dist]
+                        deerHeading = [selfx-tile.coords[0], selfy-tile.coords[1]]
                     
         self.heading[0] += deerHeading[0]
         self.heading[1] += deerHeading[1]

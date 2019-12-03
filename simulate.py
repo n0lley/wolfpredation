@@ -17,7 +17,7 @@ ax.imshow(mplot, interpolation='nearest', cmap=cmap)
 plt.savefig("./data/gen.png")
 plt.close()
 
-for i in range(50):
+for i in range(100):
     print(i)
     map.update()
     mplot = map.plotMap()

@@ -19,7 +19,7 @@ plt.close()
 
 for i in range(100):
     print(i)
-    map.update()
+    map.update(i)
     mplot = map.plotMap()
     fig = plt.figure()
     ax = fig.add_subplot(111)

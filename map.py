@@ -17,19 +17,11 @@ class Map:
             self.map.append([])
             for y in range(c.MAPSIZE[1]):
                 self.map[x].append(Tile([x,y]))
-                """
+                
                 if np.random.random() < (c.INITDEER/totalarea):
                     self.map[x][y].id = "deer"
                     self.map[x][y].addAnimal(Deer([x,y]))
                     self.deer.append((x,y))
-                """
-        for i in range(10):
-            x = np.random.randint(c.MAPSIZE[0])
-            y = np.random.randint(c.MAPSIZE[1])
-            self.map[x][y].id = "deer"
-            self.map[x][y].addAnimal(Deer([x,y]))
-            self.deer.append((x,y))
-        print(self.deer)
         
         for x in range(int(c.MAPSIZE[0]/2) - 5, int(c.MAPSIZE[0]/2) + 5):
             for y in range(int(c.MAPSIZE[1]/2) - 5, int(c.MAPSIZE[1]/2) + 5):
@@ -38,8 +30,7 @@ class Map:
                     self.map[x][y].addAnimal(Wolf([x,y]))
                     self.wolves.append((x,y))
                     
-    def update(self):
-        self.scan()
+    def update(self, time):
     
         #TODO: die
     
@@ -84,7 +75,7 @@ class Map:
         #move deer
         tmpdeer = {}
         for d in self.deer:
-            #move the wolf
+            #move the deer
             xloc = d[0]
             yloc = d[1]
             tile = self.map[xloc][yloc]
@@ -124,23 +115,14 @@ class Map:
         for w in self.wolves:
             self.map[w[0]][w[1]].clear()
             
-        self.scan()
-            
         self.wolves = list(tmpwolves.keys())
         self.deer = list(tmpdeer.keys())
-            
-        self.scan()
          
         #place wolves
         for w in self.wolves:
         
             x = w[0]
             y = w[1]
-        
-            while x<0 or x>=c.MAPSIZE[0] or y<0 or y>=c.MAPSIZE[1] or self.map[x][y].id != "empty":
-                tmp = np.random.choice([-1,0,1], size=2)
-                x += tmp[0]
-                y += tmp[1]
                 
             self.map[x][y].id = "wolf"
             tmpwolves[w].coords = [x,y]
@@ -154,21 +136,54 @@ class Map:
             
             if x < 0 or x >= c.MAPSIZE[0] or y < 0 or y >= c.MAPSIZE[1]:
                 print(d)
-            
-            while x<0 or x>=c.MAPSIZE[0] or y<0 or y>=c.MAPSIZE[1] or self.map[x][y].id != "empty":
-                tmpd = np.random.choice([-1,0,1], size=2)
-                x += tmpd[0]
-                y += tmpd[1]
                 
             self.map[x][y].id = "deer"
             tmpdeer[d].coords = [x,y]
             self.map[x][y].addAnimal(tmpdeer[d])
-        self.scan()
+        #self.scan()
         
-        #TODO: eat
-        
-        #TODO: reproduce
-
+        #wolves eat deer
+        for w in self.wolves:
+            #get neighborhood
+            tile = self.map[w[0]][w[1]]
+            wolf = tile.animal
+            
+            neighborhood = []
+            xlow = w[0] - 1
+            if xlow < 0:
+                xlow = 0
+            xhi = w[0] + 1
+            if xhi > c.MAPSIZE[0]-1:
+                xhi = c.MAPSIZE[0]-1
+            ylow = w[1] - 1
+            if ylow < 0:
+                ylow = 0
+            yhi = w[1] + 1
+            if yhi > c.MAPSIZE[1]-1:
+                yhi = c.MAPSIZE[1]-1
+            neighborhood = self.map[xlow:xhi+1]
+            for col in neighborhood:
+                col = col[ylow:yhi+1]
+                
+            prey = wolf.eat(neighborhood)
+            if prey is not None:
+                tmpx = prey[0]
+                tmpy = prey[1]
+                self.deer.remove((tmpx,tmpy))
+                self.map[tmpx][tmpy].clear()
+            
+            print("Wolves:",len(self.wolves),"Deer:",len(self.deer))
+        """
+        #if on the xth timestep, reproduce
+        if time%c.REPRODUCTIONRATE == 0:
+            for w in self.wolves:
+                wolf = self.map[w[0]][w[1]].animal
+                wolf.reproduce()
+            
+            for d in self.deer:
+                deer = self.map[d[0]][d[1]].animal
+                deer.reproduce()
+"""
     def plotMap(self):
         
         mapplot = []

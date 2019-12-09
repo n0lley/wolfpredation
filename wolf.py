@@ -15,6 +15,7 @@ class Wolf:
         selfx = self.coords[0]
         selfy = self.coords[1]
         
+        wolfheading = [0,0]
         closestDeer = [c.WOLFSENSERADIUS + 1, c.WOLFSENSERADIUS + 1]
         deerHeading = [0,0]
         
@@ -23,8 +24,8 @@ class Wolf:
             for tile in col:
                 
                 if tile.id == "wolf" and tile.animal.coords != self.coords:
-                    self.heading[0] += tile.animal.heading[0]
-                    self.heading[1] += tile.animal.heading[1]
+                    wolfheading[0] += tile.animal.heading[0]
+                    wolfheading[1] += tile.animal.heading[1]
                 
                 if tile.id == "deer":
                     dist = abs(selfx - tile.coords[0]) + abs(selfy - tile.coords[1])
@@ -32,67 +33,55 @@ class Wolf:
                         closestDeer = tile.coords
                         deerHeading = [selfx-tile.coords[0], selfy-tile.coords[1]]
                     
-        self.heading[0] += deerHeading[0]
-        self.heading[1] += deerHeading[1]
+        if abs(wolfheading[0]) + abs(wolfheading[1]) != 0:
+            wolfheading[0] = wolfheading[0]/(abs(wolfheading[0]) + abs(wolfheading[1]))
+            wolfheading[1] = wolfheading[1]/(abs(wolfheading[0]) + abs(wolfheading[1]))
         
-        #normalize the heading
-        if self.heading[0] + self.heading[1] != 0:
-            self.heading[0] = self.heading[0]/(abs(self.heading[0])+abs(self.heading[1]))
-            self.heading[1] = self.heading[1]/(abs(self.heading[0])+abs(self.heading[1]))
+        self.heading[0] += deerHeading[0]*2 + wolfheading[0]
+        self.heading[1] += deerHeading[1]*2 + wolfheading[1]
         
-        #modify the weights to be biased towards heading
-        xweights = [1./3., 1./3., 1./3.]
-        yweights = [1./3., 1./3., 1./3.]
-        if self.heading[0] < 0:
-            xweights[0] += (1./6.) * abs(self.heading[0])
-            xweights[1] = (1-xweights[0])/2
-            xweights[2] = (1-xweights[0])/2
+        if self.heading[0]<0:
+            xdir = -1
+        elif self.heading[0]>0:
+            xdir = 1
         else:
-            xweights[2] += (1./6.) * self.heading[0]
-            xweights[1] = (1-xweights[2])/2
-            xweights[0] = (1-xweights[2])/2
-            
-        if self.heading[1] < 0:
-            yweights[0] += (1./6.) * abs(self.heading[1])
-            yweights[1] = (1-yweights[0])/2
-            yweights[2] = (1-yweights[0])/2
+            xdir = 0
+        if self.heading[1]<0:
+            ydir = -1
+        elif self.heading[1]>0:
+            ydir = 1
         else:
-            yweights[2] += (1./6.) * abs(self.heading[1])
-            yweights[1] = (1-yweights[2])/2
-            yweights[0] = (1-yweights[2])/2
-            
-        #don't go off the edge of the map
-        if selfx == c.MAPSIZE[0]-1:
-            xweights[0] += xweights[2]/2
-            xweights[1] += xweights[2]/2
-            xweights[2] = 0
-        elif selfx == 0:
-            xweights[2] += xweights[0]/2
-            xweights[1] += xweights[0]/2
-            xweights[0] = 0
-            
-        if selfy == c.MAPSIZE[1]-1:
-            yweights[0] += yweights[2]/2
-            yweights[1] += yweights[2]/2
-            yweights[2] = 0
-        elif selfy == 0:
-            yweights[2] += yweights[0]/2
-            yweights[1] += yweights[0]/2
-            yweights[0] = 0
-            
-        #pick a direction
-        xdir = np.random.choice([-1,0,1], p=xweights)
-        ydir = np.random.choice([-1,0,1], p=yweights)
-        
+            ydir = 0
+  
+        if selfx==0 and xdir==-1:
+            xdir = np.random.choice([0,1])
+            self.heading[0]*=-1
+        elif selfx==c.MAPSIZE[0]-1 and xdir==1:
+            xdir = np.random.choice([-1,0])
+            self.heading[0]*=-1
+        if selfy==0 and ydir==-1:
+            ydir = np.random.choice([0,1])
+            self.heading[1]*=-1
+        elif selfy==c.MAPSIZE[1]-1 and ydir==1:
+            selfy = np.random.choice([0,-1])
+            self.heading[1]*=-1
+         
         self.coords[0] += xdir
         self.coords[1] += ydir
-
+        
     def eat(self, neighborhood):
-
-        print("TODO")
-        return 0
+    
+        prey = None
+        
+        for col in neighborhood:
+            for tile in col:
+                if tile.id == "deer":
+                    prey = tile.coords
+                    break
+        
+        return prey
     
     def reproduce(self, neighborhood):
     
-        print("TODO")
+        
         return 0

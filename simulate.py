@@ -19,7 +19,9 @@ plt.close()
 
 for i in range(100):
     print(i)
-    map.update(i)
+    w, d = map.update(i)
+    if d == 0 or w==0:
+        break
     mplot = map.plotMap()
     fig = plt.figure()
     ax = fig.add_subplot(111)

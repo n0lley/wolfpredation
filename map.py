@@ -3,6 +3,7 @@ import numpy as np
 from tile import Tile
 from deer import Deer
 from wolf import Wolf
+from copy import deepcopy
 
 class Map:
 
@@ -32,7 +33,23 @@ class Map:
                     
     def update(self, time):
     
-        #TODO: die
+        wtodel = []
+        for w in self.wolves:
+            wolf = self.wolves[w]
+            if wolf.energy <= 0:
+                wtodel.append(w)
+        for w in wtodel:
+            del self.wolves[w]
+            self.map[w[0]][w[1]].clear()
+                
+        dtodel = []
+        for d in self.deer:
+            deer = self.deer[d]
+            if deer.energy <= 0:
+                dtodel.append(d)
+        for d in dtodel:
+            del self.deer[d]
+            self.map[d[0]][d[1]].clear()
     
         #move wolves
         tmpwolves = {}
@@ -40,20 +57,30 @@ class Map:
             #move the wolf
             wolf = self.wolves[w]
             
-            neighborhood = self.getNeighborhood(w, c.WOLFSENSERADIUS)
+            if wolf.energy < 10:
+                wolf.energy -= 2
+                tmpwolves[(w[0], w[1])] = wolf
                 
-            x,y = wolf.move(w, neighborhood)
-                
-            #if the space we're trying to occupy is already taken
-            if (x, y) in list(tmpwolves.keys()) or self.map[x][y].id != "empty" or x<0 or y<0 or x>=c.MAPSIZE[0] or y>=c.MAPSIZE[1]:
-                x,y = w[0],w[1]
+            else:
+                wolf.energy -= 5
             
-            tmpwolves[(x,y)] = wolf
+                neighborhood = self.getNeighborhood(w, c.WOLFSENSERADIUS)
+                    
+                x,y = wolf.move(w, neighborhood)
+                    
+                #if the space we're trying to occupy is already taken
+                if (x, y) in list(tmpwolves.keys()) or self.map[x][y].id != "empty" or x<0 or y<0 or x>=c.MAPSIZE[0] or y>=c.MAPSIZE[1]:
+                    x,y = w[0],w[1]
+                
+                tmpwolves[(x,y)] = wolf
         
         #move deer
         tmpdeer = {}
         for d in self.deer:
             #move the deer
+            
+            deer.energy += 5
+            
             deer = self.deer[d]
             
             neighborhood = self.getNeighborhood(d, c.DEERSENSERADIUS)
@@ -109,26 +136,50 @@ class Map:
                 tmpy = prey[1]
                 del self.deer[(tmpx, tmpy)]
                 self.map[tmpx][tmpy].clear()
+                
+                wlist = []
+                n = self.getNeighborhood(w, 4)
+                for col in n:
+                    for tile in col:
+                        if tile.id == "wolf":
+                            wlist.append(tile.coords)
+                
+                for w in wlist:
+                    x = w[0]
+                    y = w[1]
+                    self.wolves[(x,y)].energy += 20
             
-        print(list(self.deer.keys()))
+        #print(list(self.deer.keys()))
         print("Wolves:",len(self.wolves),"Deer:",len(self.deer))
         
         #if on the xth timestep, reproduce
         if time%c.REPRODUCTIONRATE == 0:
+            newwolves = {}
             for w in self.wolves:
                 wolf = self.wolves[w]
                 if wolf.energy >=80:
-                    neighborhood = getNeighborhood(w,2)
+                    neighborhood = self.getNeighborhood(w,3)
                     newwolf, coords = wolf.reproduce(w, neighborhood)
                     if newwolf != None:
-                        self.wolves[coords] = newwolf
-            
+                        newwolves[coords] = newwolf
+                        
+            for w in newwolves:
+                self.wolves[w] = deepcopy(newwolves[w])
+                self.map[w[0]][w[1]].id = "wolf"
+                self.map[w[0]][w[1]].addAnimal(self.wolves[w])
+                
+            newdeers = {}
             for d in self.deer:
                 deer = self.deer[d]
-                if np.random.random() < c.DEERBIRTHCHANCE:
-                    neighborhood = getNeighborhood(d,2)
+                if np.random.random() < c.DEERBIRTHCHANCE and deer.energy > 80:
+                    neighborhood = self.getNeighborhood(d,3)
                     newdeer, coords = deer.reproduce(d, neighborhood)
-                    self.deer[coords] = newdeer
+                    if newdeer != None:
+                        newdeers[coords] = newdeer
+            for d in newdeers:
+                self.deer[d] = deepcopy(newdeers[d])
+                self.map[d[0]][d[1]].id = "deer"
+                self.map[d[0]][d[1]].addAnimal(self.deer[d])
 
         return(len(self.wolves), len(self.deer))
         
@@ -148,6 +199,7 @@ class Map:
         return mapplot
 
     def getNeighborhood(self, coords, size):
+        
         neighborhood = []
         xlow = coords[0] - size
         if xlow < 0:
@@ -161,8 +213,9 @@ class Map:
         yhi = coords[1] + size
         if yhi > c.MAPSIZE[1]-1:
             yhi = c.MAPSIZE[1]-1
-        neighborhood = self.map[xlow:xhi+1]
-        for col in neighborhood:
-            col = col[ylow:yhi+1]
+        n = self.map[xlow:xhi+1]
+        neighborhood = []
+        for col in n:
+            neighborhood.append(col[ylow:yhi+1])
 
         return neighborhood

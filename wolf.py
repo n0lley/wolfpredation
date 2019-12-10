@@ -4,7 +4,7 @@ import tile
 
 class Wolf:
     
-    def __init__(self, ww=np.random.randint(10), dw=np.random.randint(10), energy=100, heading=[np.random.random(),np.random.random()]):
+    def __init__(self, ww=np.random.randint(1,10), dw=np.random.randint(1,10), energy=79, heading=[np.random.random(),np.random.random()]):
     
         self.wolfweight = ww
         self.deerweight = dw
@@ -94,13 +94,13 @@ class Wolf:
         for col in neighborhood:
             for tile in col:
                 if tile.id == "wolf" and tile.coords != list(coords):
-                    chance = True
+                    chance1 = True
                     break
           
         if chance1:
             for col in neighborhood:
                 for tile in col:
-                    if tile.id == "empty"
+                    if tile.id == "empty":
                         chance2 = True
                         coords = tile.coords
                         break
@@ -108,7 +108,11 @@ class Wolf:
         if chance1 and chance2:
             self.energy /= 2
             ww = self.wolfweight + np.random.choice([-1,0,1])
+            if ww < 1:
+                ww = 1
             dw = self.deerweight + np.random.choice([-1,0,1])
+            if dw < 1:
+                dw = 1
             babywolf = Wolf(ww=ww, dw=dw, energy=self.energy, heading=self.heading)
             
         return babywolf, (coords[0], coords[1])

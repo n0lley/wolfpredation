@@ -5,6 +5,7 @@ from tile import Tile
 import constants as c
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
+import os
 
 map = Map()
 mplot = map.plotMap()
@@ -17,7 +18,7 @@ ax.imshow(mplot, interpolation='nearest', cmap=cmap)
 plt.savefig("./data/gen.png")
 plt.close()
 
-for i in range(100):
+for i in range(1000):
     print(i)
     w, d = map.update(i)
     if d == 0 or w==0:

@@ -66,5 +66,30 @@ class Deer:
          self.energy += tile.energy
          tile.energy = 0
      
-    def reproduce(self, neighborhood):
-         print("TODO")
+    def reproduce(self, coords, neighborhood):
+    
+        chance1 = False
+        chance2 = False
+        babydeer = None
+    
+        for col in neighborhood:
+            for tile in col:
+                if tile.id == "deer" and tile.coords != list(coords):
+                    chance1 = True
+                    break
+          
+        if chance1:
+            for col in neighborhood:
+                for tile in col:
+                    if tile.id == "empty":
+                        chance2 = True
+                        coords = tile.coords
+                        break
+        
+        if chance1 and chance2:
+            self.energy /= 2
+            ww = self.wolfweight + np.random.choice([-1,0,1])
+            dw = self.deerweight + np.random.choice([-1,0,1])
+            babydeer = Deer(ww=ww, dw=dw, energy=self.energy, heading=self.heading)
+            
+        return babydeer, (coords[0], coords[1])

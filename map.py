@@ -24,12 +24,13 @@ class Map:
                     self.map[x][y].addAnimal(Deer())
                     self.deer[(x,y)] = self.map[x][y].animal
         
-        for x in range(int(c.MAPSIZE[0]/2) - 5, int(c.MAPSIZE[0]/2) + 5):
-            for y in range(int(c.MAPSIZE[1]/2) - 5, int(c.MAPSIZE[1]/2) + 5):
-                if np.random.random() < c.INITWOLVES/100 and self.map[x][y].id == "empty":
-                    self.map[x][y].id = "wolf"
-                    self.map[x][y].addAnimal(Wolf())
-                    self.wolves[(x,y)] = self.map[x][y].animal
+        while len(self.wolves) < c.INITWOLVES:
+            x = np.random.randint(c.MAPSIZE[0]/2-5, c.MAPSIZE[0]/2+5)
+            y = np.random.randint(c.MAPSIZE[1]/2-5, c.MAPSIZE[1]/2+5)
+            if self.map[x][y].id == "empty":
+                self.map[x][y].id = "wolf"
+                self.map[x][y].addAnimal(Wolf())
+                self.wolves[(x,y)] = self.map[x][y].animal
                     
     def update(self, time):
     
@@ -56,30 +57,30 @@ class Map:
         for w in self.wolves:
             #move the wolf
             wolf = self.wolves[w]
+        
+            wolf.energy -= c.WOLFDECAY
             
-            if wolf.energy < 10:
-                wolf.energy -= 2
-                tmpwolves[(w[0], w[1])] = wolf
-                
-            else:
-                wolf.energy -= 5
+            x = w[0]
+            y = w[1]
             
-                neighborhood = self.getNeighborhood(w, c.WOLFSENSERADIUS)
+            for i in range(c.WOLFSPEED):
+        
+                neighborhood = self.getNeighborhood((x,y), c.WOLFSENSERADIUS)
                     
                 x,y = wolf.move(w, neighborhood)
                     
                 #if the space we're trying to occupy is already taken
                 if (x, y) in list(tmpwolves.keys()) or self.map[x][y].id != "empty" or x<0 or y<0 or x>=c.MAPSIZE[0] or y>=c.MAPSIZE[1]:
                     x,y = w[0],w[1]
-                
-                tmpwolves[(x,y)] = wolf
+            
+            tmpwolves[(x,y)] = wolf
         
         #move deer
         tmpdeer = {}
         for d in self.deer:
             #move the deer
             
-            deer.energy += 5
+            deer.energy += 2
             
             deer = self.deer[d]
             
@@ -147,13 +148,14 @@ class Map:
                 for w in wlist:
                     x = w[0]
                     y = w[1]
-                    self.wolves[(x,y)].energy += 20
+                    self.wolves[(x,y)].energy += 15
             
         #print(list(self.deer.keys()))
         print("Wolves:",len(self.wolves),"Deer:",len(self.deer))
         
         #if on the xth timestep, reproduce
-        if time%c.REPRODUCTIONRATE == 0:
+        #if time%c.REPRODUCTIONRATE == 0:
+        if True:
             newwolves = {}
             for w in self.wolves:
                 wolf = self.wolves[w]

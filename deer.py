@@ -15,20 +15,25 @@ class Deer:
         selfy = coords[1]
         
         #check neighborhood. Run from wolves, follow deer.
+        wolfheading = [0,0]
+        deerheading = [0,0]
         for col in neighborhood:
             for tile in col:
                 if tile.id == "wolf":
                     dx = selfx - tile.coords[0]
                     dy = selfy - tile.coords[1]
-                    self.heading[0] += dx/(abs(dx)+abs(dy))*self.wolfweight
-                    self.heading[1] += dy/(abs(dx)+abs(dy))*self.wolfweight
+                    if dx != 0:
+                        wolfheading[0] += dx/(abs(dx))
+                    if dy != 0:
+                        wolfheading[1] += dy/(abs(dy))
                 
                 elif tile.id == "deer" and tile.coords != list(coords):
-                    dx = selfx - tile.coords[0]
-                    dy = selfy - tile.coords[1]
-                    self.heading[0] += dx/(abs(dx)+abs(dy))*self.deerweight
-                    self.heading[1] += dy/(abs(dx)+abs(dy))*self.deerweight
-               
+                    deerheading[0] += tile.animal.heading[0]
+                    deerheading[1] += tile.animal.heading[1]
+        
+        self.heading[0] += wolfheading[0]*self.wolfweight + deerheading[0]*self.deerweight
+        self.heading[1] += wolfheading[1]*self.wolfweight + deerheading[1]*self.deerweight
+        
         if self.heading[0] != 0:
             self.heading[0]/=abs(self.heading[0])
         if self.heading[1] != 0:

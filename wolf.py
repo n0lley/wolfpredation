@@ -4,7 +4,7 @@ import tile
 
 class Wolf:
     
-    def __init__(self, ww=np.random.randint(1,10), dw=np.random.randint(1,10), energy=79, heading=[np.random.random(),np.random.random()]):
+    def __init__(self, ww=np.random.randint(1,5), dw=np.random.randint(1,10), energy=79, heading=[np.random.random(),np.random.random()]):
     
         self.wolfweight = ww
         self.deerweight = dw

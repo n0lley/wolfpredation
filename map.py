@@ -46,8 +46,17 @@ class Map:
         dtodel = []
         for d in self.deer:
             deer = self.deer[d]
+            n = self.getNeighborhood(d, 1)
+            surrounded = True
+            for col in n:
+                for tile in col:
+                    if tile.id == "empty":
+                        surrounded = False
             if deer.energy <= 0:
                 dtodel.append(d)
+            if surrounded:
+                dtodel.append(d)
+                
         for d in dtodel:
             del self.deer[d]
             self.map[d[0]][d[1]].clear()
@@ -62,25 +71,25 @@ class Map:
             
             x = w[0]
             y = w[1]
-            
-            for i in range(c.WOLFSPEED):
         
-                neighborhood = self.getNeighborhood((x,y), c.WOLFSENSERADIUS)
-                    
-                x,y = wolf.move(w, neighborhood)
-                    
-                #if the space we're trying to occupy is already taken
-                if (x, y) in list(tmpwolves.keys()) or self.map[x][y].id != "empty" or x<0 or y<0 or x>=c.MAPSIZE[0] or y>=c.MAPSIZE[1]:
-                    x,y = w[0],w[1]
+            neighborhood = self.getNeighborhood((x,y), c.WOLFSENSERADIUS)
+                
+            x,y = wolf.move(w, neighborhood)
+                
+            #if the space we're trying to occupy is already taken
+            if (x, y) in list(tmpwolves.keys()) or self.map[x][y].id != "empty" or x<0 or y<0 or x>=c.MAPSIZE[0] or y>=c.MAPSIZE[1]:
+                x,y = w[0],w[1]
             
             tmpwolves[(x,y)] = wolf
         
         #move deer
         tmpdeer = {}
         for d in self.deer:
-            #move the deer
             
+            x = d[0]
+            y = d[1]
             deer.energy += 2
+            #move the deer
             
             deer = self.deer[d]
             
@@ -92,7 +101,7 @@ class Map:
             disp = 1
             if (x, y) in list(tmpwolves.keys()) or self.map[x][y].id != "empty" or (x,y) in list(tmpdeer.keys()) or x<0 or y<0 or x>=c.MAPSIZE[0] or y>=c.MAPSIZE[1]:
                 x,y = d[0],d[1]
-                
+                    
             tmpdeer[(x,y)] = deer
             
         for w in self.wolves:
@@ -129,7 +138,7 @@ class Map:
             tile = self.map[w[0]][w[1]]
             wolf = tile.animal
             
-            neighborhood = self.getNeighborhood(w, 1)
+            neighborhood = self.getNeighborhood(w, 2)
                 
             prey = wolf.eat(neighborhood)
             if prey is not None:
@@ -139,7 +148,7 @@ class Map:
                 self.map[tmpx][tmpy].clear()
                 
                 wlist = []
-                n = self.getNeighborhood(w, 4)
+                n = self.getNeighborhood(w, 10)
                 for col in n:
                     for tile in col:
                         if tile.id == "wolf":
@@ -148,7 +157,7 @@ class Map:
                 for w in wlist:
                     x = w[0]
                     y = w[1]
-                    self.wolves[(x,y)].energy += 15
+                    self.wolves[(x,y)].energy += int(150/len(wlist))
             
         #print(list(self.deer.keys()))
         print("Wolves:",len(self.wolves),"Deer:",len(self.deer))
@@ -160,7 +169,7 @@ class Map:
             for w in self.wolves:
                 wolf = self.wolves[w]
                 if wolf.energy >=80:
-                    neighborhood = self.getNeighborhood(w,3)
+                    neighborhood = self.getNeighborhood(w,5)
                     newwolf, coords = wolf.reproduce(w, neighborhood)
                     if newwolf != None:
                         newwolves[coords] = newwolf
@@ -174,7 +183,7 @@ class Map:
             for d in self.deer:
                 deer = self.deer[d]
                 if np.random.random() < c.DEERBIRTHCHANCE and deer.energy > 80:
-                    neighborhood = self.getNeighborhood(d,3)
+                    neighborhood = self.getNeighborhood(d,5)
                     newdeer, coords = deer.reproduce(d, neighborhood)
                     if newdeer != None:
                         newdeers[coords] = newdeer

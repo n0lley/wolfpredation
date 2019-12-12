@@ -4,7 +4,7 @@ import tile
 
 class Wolf:
     
-    def __init__(self, ww=np.random.randint(1,5), dw=np.random.randint(1,10), energy=79, heading=[np.random.random(),np.random.random()]):
+    def __init__(self, ww=3, dw=5, energy=79, heading=[1,1]):
     
         self.wolfweight = ww
         self.deerweight = dw
@@ -38,40 +38,39 @@ class Wolf:
             wolfheading[0] = wolfheading[0]/(abs(wolfheading[0]) + abs(wolfheading[1]))
             wolfheading[1] = wolfheading[1]/(abs(wolfheading[0]) + abs(wolfheading[1]))
         
-        self.heading[0] += deerHeading[0]*self.deerweight + wolfheading[0]*self.wolfweight
-        self.heading[1] += deerHeading[1]*self.deerweight + wolfheading[1]*self.wolfweight
+        self.heading[0] += (deerHeading[0]*self.deerweight + wolfheading[0]*self.wolfweight)*1./3.
+        self.heading[1] += (deerHeading[1]*self.deerweight + wolfheading[1]*self.wolfweight)*1./3.
         
-        if self.heading[0] != 0:
-            self.heading[0] /= abs(self.heading[0])
-        if self.heading[1] != 0:
-            self.heading[1] /= abs(self.heading[1])
+        if self.heading[0] != 0 and self.heading[1] != 0:
+            self.heading[0] /= (abs(self.heading[0]) + abs(self.heading[1]))
+            self.heading[1] /= (abs(self.heading[0]) + abs(self.heading[1]))
         
         if self.heading[0]<0:
-            xdir = -1
+            xdir = self.heading[0] * c.WOLFSPEED
         elif self.heading[0]>0:
-            xdir = 1
+            xdir = self.heading[0] * c.WOLFSPEED
         else:
             xdir = 0
         if self.heading[1]<0:
-            ydir = -1
+            ydir = self.heading[1] * c.WOLFSPEED
         elif self.heading[1]>0:
-            ydir = 1
+            ydir = self.heading[1] * c.WOLFSPEED
         else:
             ydir = 0
-  
-        if selfx==0 and xdir==-1:
-            selfx = c.MAPSIZE[0]
-        elif selfx==c.MAPSIZE[0]-1 and xdir==1:
-            selfx = -1
-        if selfy==0 and ydir==-1:
-            selfy = c.MAPSIZE[1]
-        elif selfy==c.MAPSIZE[1]-1 and ydir==1:
-            selfy = 0
-         
+        
         selfx += xdir
         selfy += ydir
         
-        return selfx, selfy
+        if selfx < 0:
+            selfx = c.MAPSIZE[0]-1
+        elif selfx > c.MAPSIZE[0]-1:
+            selfx = 0
+        if selfy < 0:
+            selfy = c.MAPSIZE[1]-1
+        elif selfy > c.MAPSIZE[1]-1:
+            selfy = 0
+        
+        return int(selfx), int(selfy)
         
     def eat(self, neighborhood):
     
@@ -107,12 +106,6 @@ class Wolf:
         
         if chance1 and chance2:
             self.energy /= 2
-            ww = self.wolfweight + np.random.choice([-1,0,1])
-            if ww < 1:
-                ww = 1
-            dw = self.deerweight + np.random.choice([-1,0,1])
-            if dw < 1:
-                dw = 1
-            babywolf = Wolf(ww=ww, dw=dw, energy=self.energy, heading=self.heading)
+            babywolf = Wolf(energy=self.energy, heading=self.heading)
             
         return babywolf, (coords[0], coords[1])

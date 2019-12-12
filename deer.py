@@ -22,10 +22,8 @@ class Deer:
                 if tile.id == "wolf":
                     dx = selfx - tile.coords[0]
                     dy = selfy - tile.coords[1]
-                    if dx != 0:
-                        wolfheading[0] += dx/(abs(dx))
-                    if dy != 0:
-                        wolfheading[1] += dy/(abs(dy))
+                    wolfheading[0] += dx
+                    wolfheading[1] += dy
                 
                 elif tile.id == "deer" and tile.coords != list(coords):
                     deerheading[0] += tile.animal.heading[0]
